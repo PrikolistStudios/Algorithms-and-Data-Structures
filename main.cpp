@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <cmath>
 #include <vector>
-#include<random>
+#include <random>
 #include <stack>
 #include <memory.h>
 #include <string>
@@ -651,6 +651,8 @@ struct IsPrime {
   static constexpr bool prime = HasNoDivisions<N, N - 1>::has_no_divisions;
 };
 
+// -------------------------------SECOND SEMESTER------------------------------- //
+
 int main() {
-  
+
 }
