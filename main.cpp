@@ -8,13 +8,15 @@
 #include <sstream>
 #include <exception>
 #include <stdexcept>
+#include <algorithm>
 
 std::mt19937 random;
 
 struct Node {
   int val, h = 1;
   Node *r_child = nullptr, *l_child = nullptr, *p = nullptr;
-  Node(int value) : val(value) {}
+  Node(int value) : val(value) {
+  }
 };
 
 class AVLTree {
@@ -66,18 +68,21 @@ class AVLTree {
     Print(cur->r_child);
   }
 
-  Node* Root() { return root; }
+  Node* Root() {
+    return root;
+  }
 
  private:
   Node* tnull;
   Node* root;
 
   void Rebalance(Node* node) {
-    if (node == tnull) return;
+    if (node == tnull)
+      return;
 
     if (Delta(node) == -2) {
       int d = Delta(node->r_child);
-      if (d==0||d==-1) {
+      if (d == 0 || d == -1) {
         LeftSmallRot(node);
       } else if (d == 1) {
         LeftBigRot(node);
@@ -92,9 +97,11 @@ class AVLTree {
     }
   }
 
-  int Delta(Node* node) { return node->l_child->h - node->r_child->h; }
+  int Delta(Node* node) {
+    return node->l_child->h - node->r_child->h;
+  }
 
-  void LeftSmallRot(Node* node) { 
+  void LeftSmallRot(Node* node) {
     auto b = node->r_child;
     node->r_child = b->l_child;
     b->l_child->p = node;
@@ -118,12 +125,12 @@ class AVLTree {
     }
   }
 
-  void LeftBigRot(Node* node) { 
+  void LeftBigRot(Node* node) {
     RightSmallRot(node->r_child);
     LeftSmallRot(node);
   }
 
-  void RightSmallRot(Node* node) { 
+  void RightSmallRot(Node* node) {
     auto b = node->l_child;
     node->l_child = b->r_child;
     b->r_child->p = node;
@@ -138,25 +145,28 @@ class AVLTree {
     }
   }
 
-  void RightBigRot(Node* node) { 
+  void RightBigRot(Node* node) {
     LeftSmallRot(node->l_child);
     RightSmallRot(node);
   }
 
-  void RecountHieght(Node* node) { 
-    if (node == tnull) return;
+  void RecountHieght(Node* node) {
+    if (node == tnull)
+      return;
     node->h = std::max(node->l_child->h, node->r_child->h) + 1;
   }
 };
 
 struct CTNode {
   int k, pr;
-  CTNode *par=nullptr, *left=nullptr, *right=nullptr;
-  CTNode(int key, int priority) : k(key), pr(priority) {}
+  CTNode *par = nullptr, *left = nullptr, *right = nullptr;
+  CTNode(int key, int priority) : k(key), pr(priority) {
+  }
 };
 
 void CTPrint(CTNode* node) {
-  if (node == nullptr) return;
+  if (node == nullptr)
+    return;
   CTPrint(node->left);
   std::cout << node->k << ' ';
   CTPrint(node->right);
@@ -190,8 +200,10 @@ CTNode* BuildCartesianTree(std::vector<int> arr) {
 }
 
 CTNode* Merge(CTNode* left, CTNode* right) {
-  if (left == nullptr) return right;
-  if (right == nullptr) return left;
+  if (left == nullptr)
+    return right;
+  if (right == nullptr)
+    return left;
 
   if (left->pr < right->pr) {
     left->right = Merge(left->right, right);
@@ -203,7 +215,8 @@ CTNode* Merge(CTNode* left, CTNode* right) {
 }
 
 std::pair<CTNode*, CTNode*> Split(CTNode* node, int key) {
-  if (node == nullptr) return {nullptr, nullptr};
+  if (node == nullptr)
+    return {nullptr, nullptr};
 
   if (node->k > key) {
     auto tmp = Split(node->left, key);
@@ -216,20 +229,20 @@ std::pair<CTNode*, CTNode*> Split(CTNode* node, int key) {
   }
 }
 
-CTNode* CTInsert(CTNode* tree, int key) { 
+CTNode* CTInsert(CTNode* tree, int key) {
   auto tmp = Split(tree, key);
 
-  //CTPrint(tmp.first);
-  //std::cout << std::endl;
-  //CTPrint(tmp.second);
-  //std::cout << std::endl;
+  // CTPrint(tmp.first);
+  // std::cout << std::endl;
+  // CTPrint(tmp.second);
+  // std::cout << std::endl;
 
   auto node = new CTNode(key, random());
   return Merge(Merge(tmp.first, node), tmp.second);
 }
 
-CTNode* CTErase(CTNode* node, int key) { 
-  auto splittedKey = Split(node, key); 
+CTNode* CTErase(CTNode* node, int key) {
+  auto splittedKey = Split(node, key);
   auto left = Split(splittedKey.first, key - 1);
   return Merge(left.first, splittedKey.second);
 }
@@ -239,7 +252,8 @@ struct UCTNode {
   int size = 1;
   int val, pr, sum;
   UCTNode *par = nullptr, *left = nullptr, *right = nullptr;
-  UCTNode(int value, int priority) : val(value), pr(priority), sum(val) {}
+  UCTNode(int value, int priority) : val(value), pr(priority), sum(val) {
+  }
 
   void Recount() {
     size = 1;
@@ -254,14 +268,17 @@ struct UCTNode {
     }
   }
 
-  int Ind() { int ind = 0;
-    if (left) ind += left->size;
+  int Ind() {
+    int ind = 0;
+    if (left)
+      ind += left->size;
     return ind;
   }
 };
 
 void UCTPrint(UCTNode* node) {
-  if (node == nullptr) return;
+  if (node == nullptr)
+    return;
   UCTPrint(node->left);
   std::cout << node->val << ' ';
   UCTPrint(node->right);
@@ -297,8 +314,10 @@ UCTNode* BuildUnCartesianTree(std::vector<int> arr) {
 }
 
 UCTNode* Merge(UCTNode* left, UCTNode* right) {
-  if (left == nullptr) return right;
-  if (right == nullptr) return left;
+  if (left == nullptr)
+    return right;
+  if (right == nullptr)
+    return left;
 
   if (left->pr < right->pr) {
     left->right = Merge(left->right, right);
@@ -312,7 +331,8 @@ UCTNode* Merge(UCTNode* left, UCTNode* right) {
 }
 
 std::pair<UCTNode*, UCTNode*> Split(UCTNode* node, int pos) {
-  if (node == nullptr) return {nullptr, nullptr};
+  if (node == nullptr)
+    return {nullptr, nullptr};
 
   if (node->Ind() + 1 > pos) {
     auto tmp = Split(node->left, pos);
@@ -328,7 +348,7 @@ std::pair<UCTNode*, UCTNode*> Split(UCTNode* node, int pos) {
 }
 
 UCTNode* UCTInsert(UCTNode* tree, int val, int pos) {
-  auto tmp = Split(tree, pos+1);
+  auto tmp = Split(tree, pos + 1);
 
   // CTPrint(tmp.first);
   // std::cout << std::endl;
@@ -368,7 +388,8 @@ class LongInteger {
   std::string ToString() const {
     std::string res;
 
-    if (sign_ == -1) res += '-';
+    if (sign_ == -1)
+      res += '-';
 
     res += std::to_string((digits_.size() > 0 ? digits_.back() : 0));
 
@@ -386,18 +407,20 @@ class LongInteger {
 
     for (int i = str.size(); i > add; i -= 9) {
       if (i <= 9 + add) {
-        digits_.push_back(std::stoi(str.substr(add, i-add)));
+        digits_.push_back(std::stoi(str.substr(add, i - add)));
       } else {
         digits_.push_back(std::stoi(str.substr(i - 9, 9)));
       }
     }
 
-    while (digits_.size() > 0 && digits_.back() == 0) digits_.pop_back();
+    while (digits_.size() > 0 && digits_.back() == 0)
+      digits_.pop_back();
   }
 
   LongInteger(long long num) {
     digits_.push_back(num % base_);
-    if (num >= base_) digits_.push_back(num / base_);
+    if (num >= base_)
+      digits_.push_back(num / base_);
   }
   LongInteger() = default;
 
@@ -408,10 +431,8 @@ class LongInteger {
       return -*this > rhs ? *this = -*this - rhs : *this = rhs - (-*this);
     }
 
-
     int carry = 0;
-    for (size_t i = 0;
-         i < std::max(digits_.size(), rhs.digits_.size()) || carry; ++i) {
+    for (size_t i = 0; i < std::max(digits_.size(), rhs.digits_.size()) || carry; ++i) {
       if (i == digits_.size()) {
         digits_.push_back(0);
       }
@@ -447,7 +468,8 @@ class LongInteger {
       }
     }
 
-    while (digits_.size() > 0 && digits_.back() == 0) digits_.pop_back();
+    while (digits_.size() > 0 && digits_.back() == 0)
+      digits_.pop_back();
 
     return *this;
   }
@@ -456,10 +478,7 @@ class LongInteger {
     std::vector<int> res(rhs.digits_.size() + digits_.size() + 1);
     for (int i = 0; i < rhs.digits_.size(); ++i) {
       for (int j = 0, carry = 0; j < digits_.size() || carry; ++j) {
-        long long cur =
-            res[i + j] +
-            rhs.digits_[i] * 1ll * (j < digits_.size() ? digits_[j] : 0) +
-            carry;
+        long long cur = res[i + j] + rhs.digits_[i] * 1ll * (j < digits_.size() ? digits_[j] : 0) + carry;
         res[i + j] = cur % base_;
         carry = cur / base_;
       }
@@ -467,7 +486,8 @@ class LongInteger {
 
     sign_ *= rhs.sign_;
 
-    while (res.size() > 0 && res.back() == 0) res.pop_back();
+    while (res.size() > 0 && res.back() == 0)
+      res.pop_back();
 
     digits_ = res;
 
@@ -596,7 +616,9 @@ class Vector {
     }
   }
 
-  ~Vector() { delete[] arr_; }
+  ~Vector() {
+    delete[] arr_;
+  }
 
  private:
   size_t size_, capacity_;
@@ -623,23 +645,22 @@ class Vector {
   }
 };
 
-template<int N,int M>
+template <int N, int M>
 struct GCD {
   static constexpr int gcd = GCD<M, N % M>::gcd;
 };
 
-template<int N>
+template <int N>
 struct GCD<N, 0> {
   static constexpr int gcd = N;
 };
 
-template <int N>
+template <int Num>
 struct IsPrime {
  private:
   template <int N, int M = N - 1>
   struct HasNoDivisions {
-    static constexpr bool has_no_divisions =
-        N % M != 0 && HasNoDivisions<N, M - 1>::has_no_divisions;
+    static constexpr bool has_no_divisions = N % M != 0 && HasNoDivisions<N, M - 1>::has_no_divisions;
   };
 
   template <int N>
@@ -648,11 +669,239 @@ struct IsPrime {
   };
 
  public:
-  static constexpr bool prime = HasNoDivisions<N, N - 1>::has_no_divisions;
+  static constexpr bool prime = HasNoDivisions<Num, Num - 1>::has_no_divisions;
 };
 
 // -------------------------------SECOND SEMESTER------------------------------- //
 
-int main() {
+// Handy stuff
+std::ostream& operator<<(std::ostream& stream, const std::vector<int>& a) {
+  for (int val : a) {
+    stream << val << ' ';
+  }
 
+  return stream;
+}
+using IntPair = std::pair<int, int>;
+
+// --------SEGMENT TREE--------
+struct STNode {
+  int max = 0;
+  int to_push = 0;
+  int max_ind = 0;
+};
+
+class SegmentTree {
+ public:
+  SegmentTree(std::vector<int>& arr) : nodes(4 * arr.size()), n(arr.size()) {
+    BuildTree(arr, 0, n, 0);
+  }
+
+  void Update(int x, int ind, int tl, int tr, int v) {
+    if (tr - tl == 1) {
+      nodes[v].max += x;
+      return;
+    }
+
+    int tm = (tr + tl) / 2;
+    if (ind >= tm) {
+      Push(v, tl, tr);
+      Update(x, ind, tm, tr, v * 2 + 2);
+    } else {
+      Push(v, tl, tr);
+      Update(x, ind, tl, tm, v * 2 + 1);
+    }
+
+    Recount(v);
+  }
+
+  IntPair GetMax(int ql, int qr, int tl, int tr, int v) {
+    if (ql > qr || tl > tr) {
+      return {0, 0};
+    }
+
+    if (tl == ql && tr - 1 == qr) {
+      return {nodes[v].max, nodes[v].max_ind};
+    }
+
+    int tm = (tr + tl) / 2;
+
+    Push(v, tl, tr);
+    auto l_res = GetMax(ql, std::min(tm - 1, qr), tl, tm, v * 2 + 1);
+    auto r_res = GetMax(std::max(tm, ql), qr, tm, tr, v * 2 + 2);
+    return l_res.first > r_res.first ? l_res : r_res;
+  }
+
+  void SegmentAddition(int addition, int ql, int qr, int tl, int tr, int v) {
+    if (ql > qr || tl > tr)
+      return;
+    if (tl == ql && tr - 1 == qr) {
+      nodes[v].max += addition;
+      nodes[v].to_push += addition;
+      return;
+    }
+
+    int tm = (tr + tl) / 2;
+
+    Push(v, tl, tr);
+    SegmentAddition(addition, ql, std::min(tm - 1, qr), tl, tm, v * 2 + 1);
+    SegmentAddition(addition, std::max(tm, ql), qr, tm, tr, v * 2 + 2);
+  }
+
+ private:
+  std::vector<STNode> nodes;
+  int n;
+
+  void BuildTree(std::vector<int>& arr, int tl, int tr, int v) {
+    if (tr - tl == 1) {
+      nodes[v].max = arr[tl];
+      nodes[v].max_ind = tl;
+      return;
+    }
+
+    int tm = (tr + tl) / 2;
+
+    BuildTree(arr, tl, tm, v * 2 + 1);
+    BuildTree(arr, tm, tr, v * 2 + 2);
+    Recount(v);
+  }
+
+  void Recount(int v) {
+    nodes[v].max = std::max(nodes[v * 2 + 1].max, nodes[v * 2 + 2].max);
+    if (nodes[v].max == nodes[v * 2 + 1].max) {
+      nodes[v].max_ind = nodes[v * 2 + 1].max_ind;
+    } else {
+      nodes[v].max_ind = nodes[v * 2 + 2].max_ind;
+    }
+  }
+
+  void Push(int v, int tl, int tr) {
+    if (nodes[v].to_push == 0)
+      return;
+
+    if (tr - tl == 1) {
+      nodes[v].to_push = 0;
+      return;
+    }
+
+    nodes[v * 2 + 1].to_push += nodes[v].to_push;
+    nodes[v * 2 + 2].to_push += nodes[v].to_push;
+
+    nodes[v * 2 + 1].max += nodes[v].to_push;
+    nodes[v * 2 + 2].max += nodes[v].to_push;
+
+    nodes[v].to_push = 0;
+  }
+};
+
+// Biggest common sequence
+std::vector<int> BiggestCommonSubsequence(std::vector<int> a, std::vector<int> b) {
+  std::vector<std::vector<int>> dp(a.size() + 1, std::vector<int>(b.size() + 1, 0));
+  auto path = dp;
+  std::vector<int> answer;
+
+  for (int i = 1; i <= a.size(); ++i) {
+    for (int j = 1; j <= b.size(); ++j) {
+      if (a[i - 1] == b[j - 1]) {
+        dp[i][j] = 1 + dp[i - 1][j - 1];
+        path[i][j] = 1;
+      } else {
+        if (dp[i - 1][j] >= dp[i][j - 1]) {
+          path[i][j] = 2;
+        } else {
+          path[i][j] = 3;
+        }
+        dp[i][j] = std::max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  int i = a.size(), j = b.size();
+  while (dp[i][j] > 0) {
+    if (path[i][j] == 1) {
+      answer.push_back(a[i - 1]);
+      --i, --j;
+    } else if (path[i][j] == 2) {
+      i--;
+    } else if (path[i][j] == 3) {
+      j--;
+    }
+  }
+
+  std::reverse(answer.begin(), answer.end());
+  return answer;
+}
+
+// Biggest increasing subsequence
+int BiggestIncreasingSequenceLength(std::vector<int> a) {
+  std::vector<int> dp(a.size());
+  auto path = dp;
+
+  dp[0] = a[0];
+  for (int i = 1; i < a.size(); ++i) {
+    dp[i] = INT32_MAX;
+  }
+
+  for (int i = 1; i < a.size(); ++i) {
+    auto it = std::upper_bound(dp.begin(), dp.end(), a[i]);
+    *(++it) = a[i];
+  }
+
+  int max_length = 0;
+  for (int i = 0; i < a.size(); ++i) {
+    if (dp[i] != INT32_MAX) {
+      max_length = i + 1;
+    }
+  }
+
+  return max_length;
+}
+
+std::vector<int> BiggestIncreasingSequence(std::vector<int> a) {
+  std::vector<int> dp(a.size(), 0);
+  auto path = dp;
+
+  std::vector<IntPair> sorted(a.size());
+  for (int i = 0; i < a.size(); ++i) {
+    sorted[i] = {a[i], i};
+  }
+
+  std::sort(sorted.begin(), sorted.end(),
+            [](IntPair l, IntPair r) { return l.first == r.first ? l.second < r.second : l.first < r.first; });
+
+  SegmentTree st(dp);
+  for (int i = 0; i < sorted.size(); ++i) {
+    int sorted_ind = sorted[i].second;
+    auto max = st.GetMax(0, sorted_ind, 0, dp.size(), 0);
+    st.Update(1 + max.first, sorted_ind, 0, dp.size(), 0);
+    dp[sorted_ind] = 1 + max.first;
+    path[sorted_ind] = max.first == 0 ? -1 : max.second;
+  }
+
+  std::vector<int> answer;
+  IntPair max_length = st.GetMax(0, dp.size() - 1, 0, dp.size(), 0);
+  int cur_ind = max_length.second;
+  while (cur_ind != -1) {
+    answer.push_back(a[cur_ind]);
+    cur_ind = path[cur_ind];
+  }
+
+  std::reverse(answer.begin(), answer.end());
+  return answer;
+}
+
+int main() {
+  int n;
+  std::cin >> n;
+
+  std::vector<int> arr(n);
+  for (int& val : arr) {
+    std::cin >> val;
+  }
+
+  std::reverse(arr.begin(), arr.end());
+  auto res = BiggestIncreasingSequence(arr);
+  std::reverse(res.begin(), res.end());
+
+  std::cout << res;
 }
